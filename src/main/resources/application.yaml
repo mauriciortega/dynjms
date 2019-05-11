@@ -1,0 +1,17 @@
+client:
+  id: dynconsumer-jms
+
+logging:
+  level:
+      root: info
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost/db
+    username: admin
+    password: admin
+    driver-class-name: org.postgresql.Driver
+
+dynjms:
+  msgServer: 10
+  administradora: 123
