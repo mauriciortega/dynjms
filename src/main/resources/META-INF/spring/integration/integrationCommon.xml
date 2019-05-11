@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xmlns:int-jms="http://www.springframework.org/schema/integration/jms"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/integration
+			https://www.springframework.org/schema/integration/spring-integration.xsd
+			http://www.springframework.org/schema/integration/jms
+			https://www.springframework.org/schema/integration/jms/spring-integration-jms.xsd
+			http://www.springframework.org/schema/context
+			https://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:property-placeholder />
+
+    <int:logging-channel-adapter id="loggingChannel" log-full-message="true" logger-name="tapInbound"
+                                 level="INFO" />
+
+    <int-jms:inbound-gateway request-channel="fromJMSChannel" request-destination="requestTopic" acknowledge="transacted"/>
+
+    <int:channel id="fromJMSChannel">
+        <int:interceptors>
+            <int:wire-tap channel="loggingChannel" />
+        </int:interceptors>
+    </int:channel>
+
+    <int:header-enricher input-channel="fromJMSChannel" output-channel="persistenceChannel">
+        <int:header name="action" value="${action}" />
+        <int:header name="idOsa" value="${idOsa}" />
+    </int:header-enricher>
+
+    <int:channel id="persistenceChannel"/>
+
+
+    <int:service-activator ref="dataService" method="saveMessage" input-channel="persistenceChannel" />
+</beans>
